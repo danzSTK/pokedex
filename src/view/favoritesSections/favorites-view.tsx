@@ -11,7 +11,7 @@ export const FavoritesView = () => {
 
   if (favorites.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+      <section className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
         <Heart className="h-16 w-16 text-gray-300 mb-4" />
         <CardTitle className="text-2xl mb-2 text-muted-foreground">
           Nenhum favorito ainda
@@ -26,14 +26,14 @@ export const FavoritesView = () => {
         >
           Explorar Pokédex
         </Link>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       <div className="text-center mb-8">
-        <CardTitle className="text-3xl mb-2">
+        <CardTitle className="text-3xl mb-2 font-bold flex items-center justify-center gap-2">
           <Heart /> <span>Meus Favoritos</span>
         </CardTitle>
         <p className="text-muted-foreground">
@@ -49,6 +49,6 @@ export const FavoritesView = () => {
           </Link>
         ))}
       </section>
-    </div>
+    </section>
   );
 };

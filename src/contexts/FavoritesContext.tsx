@@ -33,7 +33,9 @@ interface FavoritesProviderProps {
   children: ReactNode;
 }
 
-export function FavoritesProvider({ children }: FavoritesProviderProps) {
+export function FavoritesProvider({
+  children,
+}: Readonly<FavoritesProviderProps>) {
   const [favorites, setFavorites] = useState<FavoritePokemon[]>([]);
 
   const addToFavorites = useCallback((pokemon: FavoritePokemon) => {
@@ -43,12 +45,11 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
       );
 
       if (isAlreadyFavorite) {
-        console.log(`${pokemon.name} já está nos favoritos`);
         return prev;
       }
 
       const newFavorites = [...prev, pokemon];
-      console.log(`${pokemon.name} adicionado aos favoritos`);
+
       return newFavorites;
     });
   }, []);
@@ -58,7 +59,7 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
       const newFavorites = prev.filter(
         (fav) => String(fav.id) !== String(pokemonId)
       );
-      console.log(`Pokemon ID ${pokemonId} removido dos favoritos`);
+
       return newFavorites;
     });
   }, []);
@@ -74,12 +75,12 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
         const newFavorites = prev.filter(
           (fav) => String(fav.id) !== String(pokemon.id)
         );
-        console.log(`${pokemon.name} removido dos favoritos via toggle`);
+
         return newFavorites;
       } else {
         // Adicionar aos favoritos
         const newFavorites = [...prev, pokemon];
-        console.log(`${pokemon.name} adicionado aos favoritos via toggle`);
+
         return newFavorites;
       }
     });
@@ -94,7 +95,6 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
 
   const clearFavorites = useCallback(() => {
     setFavorites([]);
-    console.log("Todos os favoritos foram removidos");
   }, []);
   const value: FavoritesContextType = useMemo(
     () => ({

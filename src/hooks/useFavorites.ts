@@ -11,14 +11,13 @@ const FAVORITES_KEY = "pokemon_favorites";
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoritePokemon[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded] = useState(false);
 
   // Carregar favoritos do localStorage na inicialização
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const stored = localStorage.getItem(FAVORITES_KEY);
-    console.log("Carregando favoritos do localStorage:", stored);
 
     if (stored) {
       setFavorites(JSON.parse(stored));

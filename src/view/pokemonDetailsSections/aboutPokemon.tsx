@@ -1,29 +1,22 @@
 import { InformationBadge } from "@/components/badge";
 import CardTitle from "@/components/titles/cardtitle";
-import { TYPE_COLORS } from "@/models/constants";
+import { PokemonType, TYPE_COLORS } from "@/models/constants";
 import { House, Weight } from "lucide-react";
 
 interface Props {
   pokemon: {
-    height: number;
-    weight: number;
     heightInMeters: number;
     weightInKg: number;
-    baseExperience: number;
     habitat: string | null;
     description: string | null;
-    abilities: Array<{
-      name: string;
-      isHidden: boolean;
-      slot: number;
-    }>;
+    type: PokemonType
   };
 }
 
 const AboutPokemonSection = ({ pokemon }: Props) => {
   return (
     <article className="space-y-4">
-      <CardTitle style={{ color: TYPE_COLORS["fire"] }}>
+      <CardTitle style={{ color: TYPE_COLORS[pokemon.type] }}>
         About Pokémon
       </CardTitle>
 

@@ -8,15 +8,20 @@ interface HeroSectionProps {
   pokemonName: string;
   pokemonImage: string;
   pokemonTypes?: PokemonType[];
+  isShiny?: boolean;
+  onToggleShiny?: () => void;
 }
 
 const HeroSection = ({
   pokemonName,
   pokemonImage,
   pokemonTypes,
+  isShiny,
+  onToggleShiny,
 }: HeroSectionProps) => {
+  // As props isShiny e onToggleShiny são usadas pelo componente pai para controlar o estado
   return (
-    <section className="w-full py-8">
+    <section className="w-full py-5">
       <div className="container mx-auto px-4 z-10">
         <article className="mb-2">
           <nav>

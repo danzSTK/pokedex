@@ -345,6 +345,7 @@ export interface PokemonInfoData {
     frontDefault: string | null;
     frontShiny: string | null;
     officialArtwork: string | null;
+    officialArtworkShiny: string | null;
     dreamWorld: string | null;
   };
   species: {
@@ -353,4 +354,41 @@ export interface PokemonInfoData {
   };
   habitat: string | null; // habitat natural do pokémon
   description: string | null; // descrição em português/inglês
+}
+
+// Interfaces para dados de tipo da PokeAPI
+export interface TypeRelations {
+  no_damage_to: Array<{ name: string; url: string }>;
+  half_damage_to: Array<{ name: string; url: string }>;
+  double_damage_to: Array<{ name: string; url: string }>;
+  no_damage_from: Array<{ name: string; url: string }>;
+  half_damage_from: Array<{ name: string; url: string }>;
+  double_damage_from: Array<{ name: string; url: string }>;
+}
+
+export interface TypeData {
+  id: number;
+  name: string;
+  damage_relations: TypeRelations;
+  game_indices: Array<{
+    game_index: number;
+    generation: { name: string; url: string };
+  }>;
+  generation: { name: string; url: string };
+  move_damage_class: { name: string; url: string } | null;
+  names: Array<{
+    language: { name: string; url: string };
+    name: string;
+  }>;
+  pokemon: Array<{
+    pokemon: { name: string; url: string };
+    slot: number;
+  }>;
+  moves: Array<{ name: string; url: string }>;
+}
+
+export interface TypeEffectiveness {
+  weakTo: string[]; // tipos que causam 2x de dano a este tipo
+  resistantTo: string[]; // tipos que causam 0.5x de dano a este tipo
+  immuneTo: string[]; // tipos que causam 0x de dano a este tipo
 }

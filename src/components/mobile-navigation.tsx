@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Header from "./header";
 import { Button } from "./ui/button";
-import { Filter, Heart, Home } from "lucide-react";
+import { Heart, Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback } from "react";
+import { FilterSheet } from "./filter-sheet";
 
 const MobileNavigationbar = () => {
   const path = usePathname();
@@ -46,14 +47,7 @@ const MobileNavigationbar = () => {
             </Link>
           </li>
           <li>
-            <Button
-              variant={"ghost"}
-              size={"lg"}
-              className="grid grid-col-1 place-items-center gap-0"
-            >
-              <Filter />
-              <span className="text-xs">Filters</span>
-            </Button>
+            <FilterSheet isNavButton />
           </li>
         </ul>
       </nav>

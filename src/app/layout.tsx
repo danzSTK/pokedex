@@ -4,6 +4,8 @@ import "@/styles/globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { CompareProvider } from "@/contexts/CompareContext";
+import { FilterProvider } from "@/contexts/FilterContext";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -44,7 +46,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000"
   ),
   alternates: {
     canonical: "/",
@@ -131,8 +135,12 @@ export default function RootLayout({
           storageKey="pokedex-theme"
         >
           <FavoritesProvider>
-            {children}
-            <Toaster />
+            <CompareProvider>
+              <FilterProvider>
+                {children}
+                <Toaster />
+              </FilterProvider>
+            </CompareProvider>
           </FavoritesProvider>
         </ThemeProvider>
       </body>

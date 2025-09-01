@@ -51,3 +51,8 @@ export const MAX_STATS = {
 
 
 export type StatsType = keyof typeof MAX_STATS;
+
+export type PokemonType = keyof typeof POKEMON_TYPES;
+
+
+export const POKEMON_API_BASE_URL = "https://pokeapi.co/api/v2";

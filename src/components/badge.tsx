@@ -1,7 +1,6 @@
 import { POKEMON_TYPES, TYPE_COLORS } from "@/models/constants";
 import { cn } from "@/lib/utils";
-import { House, LucideIcon, Type } from "lucide-react";
-import { Card, CardContent } from "./ui/card";
+import { LucideIcon } from "lucide-react";
 
 type TypeBadgeProps = {
   type: keyof typeof POKEMON_TYPES;
@@ -17,10 +16,13 @@ type InformationBadgeProps = {
 export function TypeBadge({ type, size = "medium" }: Readonly<TypeBadgeProps>) {
   return (
     <span
-      className={cn("px-3 py-1 rounded-full text-sm font-semibold shadow-md", {
-        "text-xs": size === "small",
-        "text-lg": size === "large",
-      })}
+      className={cn(
+        "px-5 py-2 rounded-full text-sm font-bold capitalize text-wrap shadow-md text-center flex justify-center items-center",
+        {
+          "text-xs min-w-16": size === "small",
+          "text-lg": size === "large",
+        }
+      )}
       style={{ backgroundColor: TYPE_COLORS[type] }}
     >
       {type}

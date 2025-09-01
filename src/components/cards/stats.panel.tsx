@@ -1,5 +1,4 @@
 import { MAX_STATS, StatsType, TYPE_COLORS } from "@/models/constants";
-import { Progress } from "../ui/progress";
 import { cn } from "@/lib/utils";
 import ProgressBar from "../progressBar";
 
@@ -49,8 +48,8 @@ const StatsPanel = ({ pokemon }: StatsPanelProps) => {
       </div>
       <div className="pt-2 border-t">
         <div className="flex justify-between items-center">
-          <span className="text-sm font-medium">Total</span>
-          <span className="text-sm font-bold">{totalStats}</span>
+          <span className="text-base font-medium">Total</span>
+          <span className="text-base font-bold">{totalStats}</span>
         </div>
       </div>
     </>

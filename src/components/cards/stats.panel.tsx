@@ -1,18 +1,24 @@
-import { MAX_STATS, StatsType, TYPE_COLORS } from "@/models/constants";
+import {
+  MAX_STATS,
+  PokemonType,
+  StatsType,
+  TYPE_COLORS,
+} from "@/models/constants";
 import { cn } from "@/lib/utils";
 import ProgressBar from "../progressBar";
 
 export interface StatsPanelProps {
   pokemon: { stats: { base_stat: number; stat: { name: StatsType } }[] };
+  type: PokemonType;
 }
 
-const StatsPanel = ({ pokemon }: StatsPanelProps) => {
+const StatsPanel = ({ pokemon, type }: StatsPanelProps) => {
   const totalStats = pokemon.stats.reduce(
     (acc, stat) => acc + stat.base_stat,
     0
   );
 
-  console.log(TYPE_COLORS["fire"]);
+
 
   return (
     <>
@@ -26,7 +32,7 @@ const StatsPanel = ({ pokemon }: StatsPanelProps) => {
             <div key={stat.stat.name} className="space-y-2">
               <div
                 className={cn("flex justify-between items-center text-base")}
-                style={{ color: TYPE_COLORS["fire"] }}
+                style={{ color: TYPE_COLORS[type] }}
               >
                 <span className="text-sm font-medium capitalize">
                   {statName}
@@ -38,7 +44,7 @@ const StatsPanel = ({ pokemon }: StatsPanelProps) => {
               <ProgressBar
                 value={percentage}
                 className="h-2"
-                barColor={TYPE_COLORS["fire"]}
+                barColor={TYPE_COLORS[type]}
               />
             </div>
           );

@@ -3,6 +3,7 @@ import { Poppins, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -129,8 +130,10 @@ export default function RootLayout({
           disableTransitionOnChange
           storageKey="pokedex-theme"
         >
-          {children}
-          <Toaster />
+          <FavoritesProvider>
+            {children}
+            <Toaster />
+          </FavoritesProvider>
         </ThemeProvider>
       </body>
     </html>

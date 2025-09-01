@@ -1,17 +1,24 @@
 "use client";
 
-import { TYPE_COLORS } from "@/models/constants";
-
-import { ThemeToggle } from "@/components/theme-toggle";
+// React e Next.js
+import { useState } from "react";
 import { useParams } from "next/navigation";
 
+// Components
+import { ThemeToggle } from "@/components/theme-toggle";
+import Header from "@/components/header";
 import MetricSection from "@/view/pokemonDetailsSections/metricSection";
 import AboutPokemonSection from "@/view/pokemonDetailsSections/aboutPokemon";
 import AdditionalInformation from "@/view/pokemonDetailsSections/addtionalInformation";
-import Header from "@/components/header";
 import HeroSection from "@/view/pokemonDetailsSections/Hero";
 import ActionbarSection from "@/view/pokemonDetailsSections/actionbar";
+
+// Hooks e contexts
 import { usePokemonInfo } from "@/hooks/usePokemonList";
+import { useFavorites } from "@/contexts/FavoritesContext";
+
+// Types e constantes
+import { TYPE_COLORS } from "@/models/constants";
 
 const PokemonDetailsSkeleton = () => (
   <div className="min-h-screen bg-card">
@@ -63,6 +70,12 @@ const PokemonErrorState = ({
 const PokemonDetailsPage = () => {
   const { pokemonId } = useParams<{ pokemonId: string }>();
   const { pokemon, loading, error, refetch } = usePokemonInfo(pokemonId);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const [isShiny, setIsShiny] = useState(false);
+
+  const handleToggleShiny = () => {
+    setIsShiny(!isShiny);
+  };
 
   if (loading) {
     return <PokemonDetailsSkeleton />;
@@ -81,17 +94,40 @@ const PokemonDetailsPage = () => {
   const primaryType = pokemon.types[0]?.name || "normal";
   const backgroundColor = TYPE_COLORS[primaryType] || TYPE_COLORS.normal;
 
+  const pokemonForAdditionalInformation = {
+    ...pokemon,
+    habitat: pokemon.habitat || "unknown",
+    description: pokemon.description || "No description available",
+    abilities: pokemon.abilities.map((a) => a.name),
+  };
+
+  const pokemonForAbout = {
+    heightInMeters: pokemon.heightInMeters,
+    weightInKg: pokemon.weightInKg,
+    habitat: pokemon.habitat,
+    description: pokemon.description,
+    type: primaryType,
+  };
+
   const pokemonForStats = {
     stats: pokemon.stats.map((stat) => ({
       base_stat: stat.baseStat,
-      stat: { name: stat.name },
+      stat: {
+        name: stat.name as
+          | "hp"
+          | "attack"
+          | "defense"
+          | "special-attack"
+          | "special-defense"
+          | "speed",
+      },
     })),
   };
 
   return (
     <div className="min-h-screen bg-card">
-      <Header>
-        <h1 className="text-2xl font-bold">
+      <Header className="border-b">
+        <h1 className="text-2xl font-bold capitalize">
           {pokemon.name}{" "}
           <span className="text-muted-foreground text-base font-mono">
             #{pokemon.id.toString().padStart(3, "0")}
@@ -103,29 +139,36 @@ const PokemonDetailsPage = () => {
         <HeroSection
           pokemonName={pokemon.name}
           pokemonImage={
-            pokemon.sprites.officialArtwork ||
-            pokemon.sprites.frontDefault ||
-            "/pokemon-fallback.svg"
+            isShiny
+              ? pokemon.sprites.officialArtworkShiny ||
+                pokemon.sprites.frontShiny ||
+                pokemon.sprites.frontDefault ||
+                "/pokemon-fallback.svg"
+              : pokemon.sprites.officialArtwork ||
+                pokemon.sprites.frontDefault ||
+                "/pokemon-fallback.svg"
           }
           pokemonTypes={pokemon.types.map((type) => type.name)}
+          isShiny={isShiny}
+          onToggleShiny={handleToggleShiny}
         />
         <section className="bg-card rounded-t-4xl py-24 -mt-28">
-          <div className="container mx-auto px-4 space-y-6">
-            <ActionbarSection />
-            <AboutPokemonSection
+          <div className="container mx-auto px-2 space-y-6">
+            <ActionbarSection
+              toggleFavorite={(pokemon) => toggleFavorite(pokemon)}
+              pokemon={pokemon}
+              primaryType={primaryType}
+              isFavorite={isFavorite(Number(pokemonId))}
+              isShiny={isShiny}
+              onToggleShiny={handleToggleShiny}
+            />
+            <AboutPokemonSection pokemon={pokemonForAbout} />
+            <MetricSection pokemon={pokemonForStats} type={primaryType} />
+            <AdditionalInformation
               pokemon={{
-                height: pokemon.height,
-                weight: pokemon.weight,
-                heightInMeters: pokemon.heightInMeters,
-                weightInKg: pokemon.weightInKg,
-                baseExperience: pokemon.baseExperience,
-                habitat: pokemon.habitat,
-                description: pokemon.description,
-                abilities: pokemon.abilities,
+                ...pokemonForAdditionalInformation,
               }}
             />
-            <MetricSection pokemon={pokemonForStats} />
-            <AdditionalInformation pokemon={pokemon} />
           </div>
         </section>
       </main>

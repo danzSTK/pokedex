@@ -1,28 +1,42 @@
-import { Pokemon, PokemonListResponse, PokemonSpecies } from "@/models/types";
+import {
+  Pokemon,
+  PokemonListResponse,
+  PokemonSpecies,
+  TypeData,
+} from "@/models/types";
+
+interface PokemonListItem {
+  id: number;
+  name: string;
+  types: string[];
+  imageUrl: string;
+}
+
+interface TypePokemonEntry {
+  pokemon: {
+    name: string;
+    url: string;
+  };
+}
 
 export class PokemonApi {
   private static getBaseUrl(): string {
-    // Para desenvolvimento, sempre usar IP fixo se estiver disponível
+    // Se estiver no cliente (browser)
     if (typeof window !== "undefined") {
       const currentHost = window.location.host;
-      // Se acessando via IP da rede, usar o mesmo IP para API
-      if (currentHost.includes("192.168.0.4")) {
-        return "http://192.168.0.4:3000/api";
-      }
+      const protocol = window.location.protocol;
+
+      // Usar sempre o host atual para manter consistência
+      return `${protocol}//${currentHost}/api`;
     }
 
-    // Usar variável de ambiente se definida
+    // Se variável de ambiente estiver definida (para casos específicos)
     if (process.env.NEXT_PUBLIC_API_URL) {
       return process.env.NEXT_PUBLIC_API_URL;
     }
 
-    if (typeof window !== "undefined") {
-      // Cliente: usa a URL atual
-      return `${window.location.protocol}//${window.location.host}/api`;
-    }
-
-    // Servidor: fallback para IP da rede
-    return "http://192.168.0.4:3000/api";
+    // Fallback para servidor (SSR) - usar localhost
+    return "http://localhost:3000/api";
   }
 
   static async getAllPokemons(
@@ -64,5 +78,157 @@ export class PokemonApi {
       return null;
     }
     return response.json();
+  }
+
+  static async getTypeData(typeName: string): Promise<TypeData | null> {
+    const response = await fetch(`${this.getBaseUrl()}/type/${typeName}`, {
+      next: { revalidate: 86400 }, // Cache por 24 horas
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
+  }
+
+  static async getPokemonsByTypes(types: string[]): Promise<PokemonListItem[]> {
+    if (types.length === 0) return [];
+
+    try {
+      // Buscar dados de cada tipo
+      const typeDataPromises = types.map((type) => this.getTypeData(type));
+      const typeDataResults = await Promise.all(typeDataPromises);
+
+      // Coletar todos os Pokémons únicos
+      const pokemonSet = new Set<number>();
+      const pokemonMap = new Map<number, { name: string; url: string }>();
+
+      typeDataResults.forEach((typeData) => {
+        if (typeData?.pokemon) {
+          typeData.pokemon.forEach((pokemonEntry: TypePokemonEntry) => {
+            const pokemonId = parseInt(
+              pokemonEntry.pokemon.url.split("/").slice(-2, -1)[0]
+            );
+            if (!pokemonSet.has(pokemonId)) {
+              pokemonSet.add(pokemonId);
+              pokemonMap.set(pokemonId, pokemonEntry.pokemon);
+            }
+          });
+        }
+      });
+
+      // Buscar detalhes de cada Pokémon único
+      const pokemonDetails = await Promise.allSettled(
+        Array.from(pokemonMap.values()).map(async (pokemon) => {
+          const pokemonData = await this.getPokemonByNameOrId(pokemon.name);
+          if (pokemonData) {
+            return {
+              id: pokemonData.id,
+              name: pokemonData.name,
+              types: pokemonData.types.map((type) => type.type.name),
+              imageUrl:
+                pokemonData.sprites.other["official-artwork"].front_default ||
+                pokemonData.sprites.front_default ||
+                "/pokemon-fallback.svg",
+            };
+          }
+          return null;
+        })
+      );
+
+      // Filtrar resultados válidos e ordenar por ID
+      return pokemonDetails
+        .filter(
+          (result): result is PromiseFulfilledResult<PokemonListItem> =>
+            result.status === "fulfilled" && result.value !== null
+        )
+        .map((result) => result.value)
+        .sort((a, b) => a.id - b.id);
+    } catch (error) {
+      console.error("Error fetching Pokemon by types:", error);
+      return [];
+    }
+  }
+
+  // Método para busca paginada por tipos
+  static async getPokemonsByTypesPaginated(
+    types: string[],
+    offset: number = 0,
+    limit: number = 20
+  ): Promise<{
+    pokemons: PokemonListItem[];
+    totalCount: number;
+    hasMore: boolean;
+  }> {
+    if (types.length === 0) {
+      return { pokemons: [], totalCount: 0, hasMore: false };
+    }
+
+    try {
+      // Buscar dados de cada tipo
+      const typeDataPromises = types.map((type) => this.getTypeData(type));
+      const typeDataResults = await Promise.all(typeDataPromises);
+
+      // Coletar todos os Pokémons únicos
+      const pokemonSet = new Set<number>();
+      const pokemonMap = new Map<number, { name: string; url: string }>();
+
+      typeDataResults.forEach((typeData) => {
+        if (typeData?.pokemon) {
+          typeData.pokemon.forEach((pokemonEntry: TypePokemonEntry) => {
+            const pokemonId = parseInt(
+              pokemonEntry.pokemon.url.split("/").slice(-2, -1)[0]
+            );
+            if (!pokemonSet.has(pokemonId)) {
+              pokemonSet.add(pokemonId);
+              pokemonMap.set(pokemonId, pokemonEntry.pokemon);
+            }
+          });
+        }
+      });
+
+      // Ordenar IDs e aplicar paginação
+      const allPokemonIds = Array.from(pokemonSet).sort((a, b) => a - b);
+      const totalCount = allPokemonIds.length;
+      const paginatedIds = allPokemonIds.slice(offset, offset + limit);
+      const hasMore = offset + limit < totalCount;
+
+      // Buscar dados completos apenas dos Pokémons da página atual
+      const pokemonPromises = paginatedIds.map(async (id) => {
+        try {
+          const pokemon = pokemonMap.get(id);
+          if (!pokemon) return null;
+
+          const pokemonData = await this.getPokemonByNameOrId(pokemon.name);
+          if (!pokemonData) return null;
+
+          return {
+            id: pokemonData.id,
+            name: pokemonData.name,
+            types: pokemonData.types.map((t) => t.type.name),
+            imageUrl:
+              pokemonData.sprites.other["official-artwork"].front_default ||
+              pokemonData.sprites.front_default ||
+              "/pokemon-fallback.svg",
+          };
+        } catch (error) {
+          console.error(`Error loading pokemon with ID ${id}:`, error);
+          return null;
+        }
+      });
+
+      const pokemonData = await Promise.all(pokemonPromises);
+      const validPokemons = pokemonData.filter(
+        (pokemon): pokemon is PokemonListItem => pokemon !== null
+      );
+
+      return {
+        pokemons: validPokemons,
+        totalCount,
+        hasMore,
+      };
+    } catch (error) {
+      console.error("Error fetching Pokémons by types (paginated):", error);
+      throw error;
+    }
   }
 }

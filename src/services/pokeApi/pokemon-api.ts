@@ -1,3 +1,4 @@
+import { PokemonType } from "@/models/constants";
 import {
   Pokemon,
   PokemonListResponse,
@@ -8,7 +9,7 @@ import {
 interface PokemonListItem {
   id: number;
   name: string;
-  types: string[];
+  types: PokemonType[];
   imageUrl: string;
 }
 

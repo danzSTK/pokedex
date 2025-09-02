@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 // Hooks e contexts
-import { useCompare } from "@/contexts/CompareContext";
+import { useCompare } from "@/hooks/useCompare";
 
 // Utils
 import { cn } from "@/lib/utils";
@@ -36,14 +36,24 @@ const ActionbarSection = ({
   isShiny,
   onToggleShiny,
 }: Props) => {
-  const { addToCompare, removeFromCompare, isInCompare, canAddMore } =
-    useCompare();
+  const { isCompared, toggleCompare } = useCompare();
+
+  const compareData = {
+    id: pokemon.id,
+    name: pokemon.name,
+    imageUrl:
+      pokemon.sprites.officialArtwork ||
+      pokemon.sprites.frontDefault ||
+      "/pokemon-fallback.svg",
+    types: pokemon.types.map((t) => t.name),
+    stats: pokemon.stats,
+  };
 
   const favoritedPokemon = () => {
     toggleFavorite({
       id: pokemon.id,
       name: pokemon.name,
-      imageUrl:
+      image:
         pokemon.sprites.officialArtwork ||
         pokemon.sprites.frontDefault ||
         "/pokemon-fallback.svg",
@@ -52,25 +62,10 @@ const ActionbarSection = ({
   };
 
   const handleCompare = () => {
-    const compareData = {
-      id: pokemon.id,
-      name: pokemon.name,
-      imageUrl:
-        pokemon.sprites.officialArtwork ||
-        pokemon.sprites.frontDefault ||
-        "/pokemon-fallback.svg",
-      types: pokemon.types.map((t) => t.name),
-      stats: pokemon.stats,
-    };
-
-    if (isInCompare(pokemon.id)) {
-      removeFromCompare(pokemon.id);
-    } else if (canAddMore) {
-      addToCompare(compareData);
-    }
+    toggleCompare(compareData);
   };
 
-  const isInCompareList = isInCompare(pokemon.id);
+  const isInCompareList = isCompared(compareData);
   return (
     <article>
       <nav className="space-y-4 md:flex justify-between items-center">
@@ -113,7 +108,6 @@ const ActionbarSection = ({
                 <Button
                   variant={isInCompareList ? "default" : "outline"}
                   onClick={handleCompare}
-                  disabled={!canAddMore && !isInCompareList}
                 >
                   <GitCompare className="h-4 w-4" />
                   <span>{isInCompareList ? "comparing" : "Compare"}</span>

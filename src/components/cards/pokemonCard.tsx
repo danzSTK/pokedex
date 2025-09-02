@@ -11,12 +11,12 @@ import { TypeBadge } from "../badge";
 import { FavoriteButton } from "../favorite-button";
 
 // Hooks e contexts
-import { useFavorites } from "@/contexts/FavoritesContext";
+import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 
 // Types e constantes
 import { TYPE_COLORS, type PokemonType } from "@/models/constants";
-import { ComparePokemon } from "@/contexts/CompareContext";
+import { ComparePokemon } from "@/hooks/useCompare";
 
 type PokemonCardDefaultProps = {
   pokemon: {
@@ -50,23 +50,26 @@ export const PokemonCardDefault = ({ pokemon }: PokemonCardDefaultProps) => {
   const backgroundColor = TYPE_COLORS[primaryType] || TYPE_COLORS.normal;
 
   const handleToggleFavorite = () => {
-    const wasFavorite = isFavorite(pokemon.id);
-
-    toggleFavorite({
-      id: pokemon.id,
+    const pokemonData = {
+      id: Number(pokemon.id),
       name: pokemon.name,
+      image:
+        pokemon.imageUrl ||
+        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`,
       types: pokemon.types,
-      imageUrl: pokemon.imageUrl,
-    });
+    };
 
-    // Mostrar feedback ao usuário
+    const wasFavorite = isFavorite(pokemonData.id);
+    toggleFavorite(pokemonData);
+
+
     toast({
       title: wasFavorite
         ? "Removido dos favoritos"
         : "Adicionado aos favoritos",
       description: wasFavorite
-        ? `${pokemon.name} foi removido da sua lista de favoritos`
-        : `${pokemon.name} foi adicionado à sua lista de favoritos`,
+        ? `${pokemon.name} foi removido da sua lista de favoritos.`
+        : `${pokemon.name} foi adicionado à sua lista de favoritos.`,
       duration: 2000,
     });
   };
@@ -77,7 +80,7 @@ export const PokemonCardDefault = ({ pokemon }: PokemonCardDefaultProps) => {
       style={{ backgroundColor }}
     >
       <FavoriteButton
-        isFavorite={isFavorite(pokemon.id)}
+        isFavorite={isFavorite(Number(pokemon.id))}
         onToggle={handleToggleFavorite}
       />
 

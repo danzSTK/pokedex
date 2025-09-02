@@ -1,5 +1,6 @@
 "use client";
 
+import { ComparePokemon } from "@/hooks/useCompare";
 import React, {
   createContext,
   useContext,
@@ -8,16 +9,6 @@ import React, {
   useMemo,
 } from "react";
 
-export interface ComparePokemon {
-  id: number;
-  name: string;
-  imageUrl: string;
-  types: string[];
-  stats: Array<{
-    name: string;
-    baseStat: number;
-  }>;
-}
 
 interface CompareContextType {
   comparePokemons: ComparePokemon[];

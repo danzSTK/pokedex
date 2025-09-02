@@ -1,6 +1,6 @@
 "use client";
 
-import { useFavorites } from "@/contexts/FavoritesContext";
+import { useFavorites } from "@/hooks/useFavorites";
 import { PokemonCardDefault } from "@/components/cards/pokemonCard";
 import CardTitle from "@/components/titles/cardtitle";
 import Link from "next/link";

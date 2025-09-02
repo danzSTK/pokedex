@@ -1,11 +1,11 @@
-
+import { PokemonType } from "@/models/constants";
 import { useState, useEffect, useCallback } from "react";
 
 export interface FavoritePokemon {
   id: number;
   name: string;
   image: string;
-  types: string[];
+  types: PokemonType[];
 }
 
 const FAVORITES_KEY = "pokemon_favorites";
@@ -41,7 +41,6 @@ export function useFavorites() {
       updatedFavorites = [...currentFavorites, pokemon];
     }
 
- 
     try {
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
     } catch (error) {

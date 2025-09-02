@@ -116,16 +116,14 @@ const Home = () => {
         )}{" "}
         <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {pokemons.map((pokemon) => (
-            <Link key={pokemon.id} href={`/pokemon/${pokemon.id}`}>
-              <PokemonCardDefault pokemon={pokemon} />
-            </Link>
+            <PokemonCardDefault key={pokemon.id} pokemon={pokemon} />
           ))}
 
           {/* Mostrar skeletons enquanto carrega */}
           {loading && !isSearching && renderSkeletons()}
         </section>
         {/* Indicador de carregamento no final */}
-{/*         {loading && pokemons.length > 0 && !isSearching && (
+        {/*         {loading && pokemons.length > 0 && !isSearching && (
           <div className="flex justify-center mt-8">
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>

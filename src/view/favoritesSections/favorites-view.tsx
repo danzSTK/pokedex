@@ -44,9 +44,15 @@ export const FavoritesView = () => {
 
       <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {favorites.map((pokemon) => (
-          <Link key={pokemon.id} href={`/pokemon/${pokemon.id}`}>
-            <PokemonCardDefault pokemon={pokemon} />
-          </Link>
+          <PokemonCardDefault
+            key={pokemon.id}
+            pokemon={{
+              id: pokemon.id,
+              name: pokemon.name,
+              types: pokemon.types,
+              imageUrl: pokemon.image,
+            }}
+          />
         ))}
       </section>
     </section>

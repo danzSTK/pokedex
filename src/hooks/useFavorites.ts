@@ -1,72 +1,63 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 
 export interface FavoritePokemon {
-  id: string | number;
+  id: number;
   name: string;
+  image: string;
   types: string[];
-  imageUrl?: string;
 }
 
 const FAVORITES_KEY = "pokemon_favorites";
 
+const getFavoritesFromStorage = (): FavoritePokemon[] => {
+  try {
+    const storedFavorites = localStorage.getItem(FAVORITES_KEY);
+    return storedFavorites ? JSON.parse(storedFavorites) : [];
+  } catch (error) {
+    console.error("Erro ao ler favoritos do localStorage:", error);
+    return [];
+  }
+};
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoritePokemon[]>([]);
-  const [isLoaded] = useState(false);
 
-  // Carregar favoritos do localStorage na inicialização
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const stored = localStorage.getItem(FAVORITES_KEY);
-
-    if (stored) {
-      setFavorites(JSON.parse(stored));
-    }
+    setFavorites(getFavoritesFromStorage());
   }, []);
 
-  // persistir favoritos no localStorage
-  useEffect(() => {
-    if (!isLoaded || typeof window === "undefined") return;
+  const toggleFavorite = useCallback((pokemon: FavoritePokemon) => {
+    const currentFavorites = getFavoritesFromStorage();
+    const exists = currentFavorites.some((fav) => fav.id === pokemon.id);
 
-    try {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-    } catch (error) {
-      console.error("Erro ao salvar favoritos:", error);
+    let updatedFavorites: FavoritePokemon[];
+
+    if (exists) {
+      updatedFavorites = currentFavorites.filter(
+        (fav) => fav.id !== pokemon.id
+      );
+    } else {
+      updatedFavorites = [...currentFavorites, pokemon];
     }
-  }, [favorites, isLoaded]);
 
-  const addFavorites = (pokemon: FavoritePokemon) => {
-    setFavorites((prev) =>
-      prev.some((fav) => String(fav.id) === String(pokemon.id))
-        ? prev
-        : [...prev, pokemon]
-    );
-  };
+ 
+    try {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
+    } catch (error) {
+      console.error("Erro ao salvar favoritos no localStorage:", error);
+    }
 
-  const removeFavorites = (pokemon: FavoritePokemon) => {
-    setFavorites((prev) =>
-      prev.filter((fav) => String(fav.id) !== String(pokemon.id))
-    );
-  };
+    setFavorites(updatedFavorites);
+  }, []);
 
-  const toggleFavorite = (pokemon: FavoritePokemon) => {
-    setFavorites((prev) =>
-      prev.some((fav) => String(fav.id) === String(pokemon.id))
-        ? prev.filter((prev) => String(prev.id) !== String(pokemon.id))
-        : [...prev, pokemon]
-    );
-  };
-
-  const isFavorite = (pokemonId: string | number): boolean => {
-    return favorites.some((fav) => String(fav.id) === String(pokemonId));
+  const isFavorite = (id: number): boolean => {
+    return favorites.some((fav) => fav.id === id);
   };
 
   return {
-    toggleFavorite,
-    isFavorite,
-    isLoaded,
     favorites,
-    addFavorites,
-    removeFavorites,
+    isFavorite,
+    toggleFavorite,
   };
 }

@@ -15,7 +15,7 @@ import ActionbarSection from "@/view/pokemonDetailsSections/actionbar";
 
 // Hooks e contexts
 import { usePokemonInfo } from "@/hooks/usePokemonList";
-import { useFavorites } from "@/contexts/FavoritesContext";
+import { useFavorites } from "@/hooks/useFavorites";
 
 // Types e constantes
 import { TYPE_COLORS } from "@/models/constants";

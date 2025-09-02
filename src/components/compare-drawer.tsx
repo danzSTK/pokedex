@@ -19,10 +19,10 @@ import { PokemonCardCompare } from "./cards/pokemonCard";
 import CardTitle from "./titles/cardtitle";
 
 // Hooks e contexts
-import { useCompare } from "@/contexts/CompareContext";
+import { useCompare } from "@/hooks/useCompare";
 
 export function CompareDrawer() {
-  const { comparePokemons, removeFromCompare, clearCompare } = useCompare();
+  const { comparePokemons, removeCompare, clearCompare } = useCompare();
   const [isOpen, setIsOpen] = useState(false);
 
   if (comparePokemons.length === 0) {
@@ -57,7 +57,7 @@ export function CompareDrawer() {
             <PokemonCardCompare
               key={pokemon.id}
               pokemon={pokemon}
-              removeFromCompare={removeFromCompare}
+              removeFromCompare={removeCompare}
             />
           ))}
 

@@ -42,6 +42,7 @@ export function PokemonSearch({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          name="search-pokemon-input"
           type="text"
           placeholder={placeholder}
           value={searchQuery}

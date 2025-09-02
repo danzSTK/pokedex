@@ -125,7 +125,7 @@ const Home = () => {
           {loading && !isSearching && renderSkeletons()}
         </section>
         {/* Indicador de carregamento no final */}
-        {loading && pokemons.length > 0 && !isSearching && (
+{/*         {loading && pokemons.length > 0 && !isSearching && (
           <div className="flex justify-center mt-8">
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -136,7 +136,7 @@ const Home = () => {
               </span>
             </div>
           </div>
-        )}
+        )} */}
         {/* Mensagem quando não há mais pokémons */}
         {!hasMore && pokemons.length > 0 && !isSearching && (
           <div className="text-center mt-8">

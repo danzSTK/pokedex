@@ -1,8 +1,8 @@
 "use client";
 
+import { PokemonType } from "@/models/constants";
 import React, {
   createContext,
-  useContext,
   useState,
   ReactNode,
   useMemo,
@@ -10,109 +10,83 @@ import React, {
 } from "react";
 
 export interface FavoritePokemon {
-  id: string | number;
+  id: number;
   name: string;
-  types: string[];
-  imageUrl?: string;
+  image: string;
+  types: PokemonType[];
 }
 
 interface FavoritesContextType {
   favorites: FavoritePokemon[];
-  addToFavorites: (pokemon: FavoritePokemon) => void;
-  removeFromFavorites: (pokemonId: string | number) => void;
   toggleFavorite: (pokemon: FavoritePokemon) => void;
-  isFavorite: (pokemonId: string | number) => boolean;
-  clearFavorites: () => void;
+  isFavorite: (pokemonId: number) => boolean;
 }
 
-const FavoritesContext = createContext<FavoritesContextType | undefined>(
-  undefined
-);
+export const FavoritesContext = createContext<FavoritesContextType>({
+  favorites: [],
+  toggleFavorite: () => {},
+  isFavorite: () => false,
+});
 
 interface FavoritesProviderProps {
   children: ReactNode;
 }
 
+const FAVORITES_KEY = "pokemon_favorites";
+
+const getFavoritesFromStorage = (): FavoritePokemon[] => {
+  try {
+    const storedFavorites = localStorage.getItem(FAVORITES_KEY);
+    return storedFavorites ? JSON.parse(storedFavorites) : [];
+  } catch (error) {
+    console.error("Erro ao ler favoritos do localStorage:", error);
+    return [];
+  }
+};
+
 export function FavoritesProvider({
   children,
 }: Readonly<FavoritesProviderProps>) {
-  const [favorites, setFavorites] = useState<FavoritePokemon[]>([]);
+  const [favorites, setFavorites] = useState<FavoritePokemon[]>(
+    getFavoritesFromStorage()
+  );
 
-  const addToFavorites = useCallback((pokemon: FavoritePokemon) => {
-    setFavorites((prev) => {
-      const isAlreadyFavorite = prev.some(
-        (fav) => String(fav.id) === String(pokemon.id)
-      );
+  const toggleFavorite = useCallback(
+    (pokemon: FavoritePokemon) => {
+      const exists = favorites.find((fav) => fav.id === pokemon.id);
 
-      if (isAlreadyFavorite) {
-        return prev;
-      }
+      const updatedFavorites: FavoritePokemon[] = [];
 
-      const newFavorites = [...prev, pokemon];
-
-      return newFavorites;
-    });
-  }, []);
-
-  const removeFromFavorites = useCallback((pokemonId: string | number) => {
-    setFavorites((prev) => {
-      const newFavorites = prev.filter(
-        (fav) => String(fav.id) !== String(pokemonId)
-      );
-
-      return newFavorites;
-    });
-  }, []);
-
-  const toggleFavorite = useCallback((pokemon: FavoritePokemon) => {
-    setFavorites((prev) => {
-      const isAlreadyFavorite = prev.some(
-        (fav) => String(fav.id) === String(pokemon.id)
-      );
-
-      if (isAlreadyFavorite) {
-        // Remover dos favoritos
-        const newFavorites = prev.filter(
-          (fav) => String(fav.id) !== String(pokemon.id)
+      if (exists) {
+        updatedFavorites.push(
+          ...favorites.filter((fav) => fav.id !== pokemon.id)
         );
-
-        return newFavorites;
       } else {
-        // Adicionar aos favoritos
-        const newFavorites = [...prev, pokemon];
-
-        return newFavorites;
+        updatedFavorites.push(...favorites, pokemon);
       }
-    });
-  }, []);
 
-  const isFavorite = useCallback(
-    (pokemonId: string | number): boolean => {
-      return favorites.some((fav) => String(fav.id) === String(pokemonId));
+      try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(updatedFavorites));
+      } catch (error) {
+        console.error("Erro ao salvar favoritos no localStorage:", error);
+      }
+
+      setFavorites(updatedFavorites);
     },
     [favorites]
   );
 
-  const clearFavorites = useCallback(() => {
-    setFavorites([]);
-  }, []);
+  const isFavorite = (id: number): boolean => {
+    return favorites.some((fav) => fav.id === id);
+  };
+
   const value: FavoritesContextType = useMemo(
     () => ({
       favorites,
-      addToFavorites,
-      removeFromFavorites,
       toggleFavorite,
       isFavorite,
-      clearFavorites,
     }),
-    [
-      favorites,
-      addToFavorites,
-      removeFromFavorites,
-      toggleFavorite,
-      isFavorite,
-      clearFavorites,
-    ]
+    [favorites, toggleFavorite, isFavorite]
   );
 
   return (
@@ -120,14 +94,4 @@ export function FavoritesProvider({
       {children}
     </FavoritesContext.Provider>
   );
-}
-
-export function useFavorites(): FavoritesContextType {
-  const context = useContext(FavoritesContext);
-
-  if (context === undefined) {
-    throw new Error("useFavorites must be used within a FavoritesProvider");
-  }
-
-  return context;
 }

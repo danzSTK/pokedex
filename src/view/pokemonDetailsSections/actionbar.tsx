@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 // Types e constantes
 import { PokemonType, TYPE_COLORS } from "@/models/constants";
 import { PokemonInfoData } from "@/models/types";
-import { FavoritePokemon } from "@/hooks/useFavorites";
+import { FavoritePokemon } from "@/contexts/FavoritesContext";
 
 interface Props {
   pokemon: PokemonInfoData;
